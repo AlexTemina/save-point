@@ -16,6 +16,13 @@ struct Item: Codable, Hashable, Identifiable {
     let issue: String?
     let pr: Int?
     var kind: String? = nil
+    /// Quest fields: who and what it is, its step in the Misión principal, the agents on it, its sub-issues and QA.
+    var title: String? = nil
+    var labels: [String]? = nil
+    var step: Int? = nil
+    var agents: [Item]? = nil
+    var children: [Child]? = nil
+    var qa: [QA]? = nil
 
     var isOpen: Bool { status == "open" }
 
@@ -48,6 +55,30 @@ struct Item: Codable, Hashable, Identifiable {
     }
 
     var heading: String { primary?.title ?? text }
+}
+
+/// One sub-issue of a quest that is a Linear parent.
+struct Child: Codable, Hashable, Identifiable {
+    var id: String { issue }
+    let issue: String
+    let title: String
+    let url: String?
+    let status: String?
+    let qa: [QA]?
+}
+
+/// One check of an issue's `## QA` section.
+struct QA: Codable, Hashable {
+    let text: String
+    let done: Bool
+}
+
+/// The day as quests: every quest a Linear issue. Events are meetings, never quests.
+struct Quests: Codable {
+    let main: [Item]
+    let side: [Item]
+    let events: [Item]
+    let unlinked: [String]
 }
 
 /// A timeline line, `HH:MM ✅ what happened`.
@@ -140,13 +171,17 @@ struct Day: Codable {
     let sections: [DaySection]
     let matrix: Matrix?
     let layers: Layers?
+    let quests: Quests?
     let contract: Contract?
     let progress: Progress
 
     var next: Item? { queue.first(where: \.isOpen) }
 
     /// Every task line of the day's plan, wherever it sits.
-    var allItems: [Item] { [focus].compactMap { $0 } + queue + parallel + decisions + notToday + sections.flatMap(\.items) }
+    var allItems: [Item] {
+        [focus].compactMap { $0 } + queue + parallel + decisions + notToday + sections.flatMap(\.items)
+            + (quests.map { $0.main + $0.side } ?? [])
+    }
 }
 
 

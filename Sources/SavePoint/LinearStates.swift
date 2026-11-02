@@ -7,7 +7,16 @@ import Foundation
 final class LinearStates: ObservableObject {
     static let shared = LinearStates()
 
-    struct Entry: Codable, Equatable { let name: String; let type: String; let at: TimeInterval }
+    struct Entry: Codable, Equatable {
+        let name: String
+        let type: String
+        let at: TimeInterval
+        var qa: [QA]? = nil
+        var children: [Sub]? = nil
+    }
+
+    /// A sub-issue as cached: export-daily turns its state into a status.
+    struct Sub: Codable, Equatable { let issue: String; let title: String; let url: String; let name: String; let type: String; let qa: [QA] }
 
     nonisolated static let file = Paths.folder.appendingPathComponent("linear.json")
 
@@ -63,16 +72,53 @@ final class LinearStates: ObservableObject {
         }
     }
 
+    private struct Issue: Decodable {
+        struct State: Decodable { let name: String; let type: String }
+        let identifier: String?
+        let title: String?
+        let url: String?
+        let description: String?
+        let state: State
+    }
+
     nonisolated private static func fetch(_ issue: String) -> Entry? {
-        struct Reply: Decodable {
-            struct Result: Decodable { let issue: Issue }
-            struct Issue: Decodable { let state: State }
-            struct State: Decodable { let name: String; let type: String }
-            let result: Result
-        }
+        struct Reply: Decodable { struct Result: Decodable { let issue: Issue }; let result: Result }
+        struct Children: Decodable { struct Result: Decodable { let issues: [Issue] }; let result: Result }
         guard let data = try? Orca.run(["linear", "issue", "--id", issue, "--json"]),
               let reply = try? JSONDecoder().decode(Reply.self, from: data) else { return nil }
-        return Entry(name: reply.result.issue.state.name, type: reply.result.issue.state.type, at: Date.now.timeIntervalSince1970)
+        let found = reply.result.issue
+        var subs: [Sub]? = nil
+        if let data = try? Orca.run(["linear", "list-issues", "--parent-id", issue, "--json"]),
+           let list = try? JSONDecoder().decode(Children.self, from: data) {
+            subs = list.result.issues.compactMap { c in
+                guard let id = c.identifier else { return nil }
+                return Sub(issue: id, title: c.title ?? id, url: c.url ?? "", name: c.state.name, type: c.state.type, qa: qa(c.description))
+            }.sorted { $0.issue < $1.issue }
+        }
+        return Entry(name: found.state.name, type: found.state.type, at: Date.now.timeIntervalSince1970,
+                     qa: qa(found.description), children: subs)
+    }
+
+    /// The checks of a `## QA` section, one per top-level bullet, continuation lines joined.
+    nonisolated static func qa(_ description: String?) -> [QA] {
+        guard let description else { return [] }
+        var checks: [QA] = []
+        var inside = false
+        for raw in description.components(separatedBy: "\n") {
+            let line = raw.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("#") { inside = line.lowercased().hasPrefix("## qa"); continue }
+            guard inside, !line.isEmpty else { continue }
+            if raw.hasPrefix("- ") || raw.hasPrefix("* ") {
+                var text = String(line.dropFirst(2))
+                var done = false
+                if text.hasPrefix("[ ] ") { text = String(text.dropFirst(4)) }
+                else if text.lowercased().hasPrefix("[x] ") { text = String(text.dropFirst(4)); done = true }
+                checks.append(QA(text: text, done: done))
+            } else if let last = checks.popLast() {
+                checks.append(QA(text: last.text + " " + line, done: last.done))
+            }
+        }
+        return checks
     }
 
     /// Today's plan as the exporter wrote it, without any overlay: only its issues matter here.

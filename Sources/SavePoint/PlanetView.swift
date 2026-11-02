@@ -42,7 +42,7 @@ struct PlanetView: View {
                 Text(planet.role).font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
-            if planet == .sideQuests || planet == .collectibles {
+            if planet == .sideQuests {
                 let list = journey.items(planet, day)
                 Text("\(list.filter { !$0.isOpen }.count)/\(list.count)").font(.title3.monospacedDigit()).foregroundStyle(.secondary)
             }
@@ -81,7 +81,8 @@ struct PlanetView: View {
             if let contract = day.contract { ContractCard(contract: contract) }
             if let frog = journey.frog(day) {
                 spotlight(L.activeNow.text, frog, strong: true)
-                let rest = (day.layers?.mainQuest ?? []).filter { $0.md != frog.md }
+                questDetail(frog)
+                let rest = (day.quests?.main ?? day.layers?.mainQuest ?? []).filter { $0.md != frog.md }
                 if !rest.isEmpty {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(L.nextUp.text.uppercased()).font(.system(size: 10.5, weight: .heavy)).tracking(0.8)
@@ -110,6 +111,37 @@ struct PlanetView: View {
                     }
                 }
             }
+        }
+    }
+
+    /// What sits under a quest: the agents working on it, its sub-issues, and the QA that says it is done.
+    @ViewBuilder
+    private func questDetail(_ quest: Item) -> some View {
+        if let agents = quest.agents, !agents.isEmpty {
+            Card(title: L.agents.text, icon: "cpu") { ForEach(agents) { ItemRow(item: $0) } }
+        }
+        if let children = quest.children, !children.isEmpty {
+            Card(title: L.subIssues.text, trailing: "\(children.filter { $0.status == "done" }.count)/\(children.count)") {
+                ForEach(children) { childRow($0) }
+            }
+        }
+        if let qa = quest.qa, !qa.isEmpty {
+            Card(title: "QA", trailing: "\(qa.filter(\.done).count)/\(qa.count)") {
+                ForEach(qa, id: \.self) { check in
+                    Label(check.text, systemImage: check.done ? "checkmark.square.fill" : "square")
+                        .font(.callout).foregroundStyle(check.done ? .secondary : .primary)
+                }
+            }
+        }
+    }
+
+    private func childRow(_ child: Child) -> some View {
+        let done = child.status == "done"
+        let label = "\(child.issue) · \(child.title)"
+        let url: URL? = child.url.flatMap { URL(string: $0) }
+        return HStack(spacing: 8) {
+            StatusDot(color: done ? Color.green : planet.tone, filled: done, check: done, size: 14)
+            if let url { SwiftUI.Link(label, destination: url).font(.callout) } else { Text(label).font(.callout) }
         }
     }
 
@@ -170,6 +202,7 @@ struct PlanetView: View {
         switch item.kind {
         case "decision": AnyView(Label(L.kindDecision.text, systemImage: "questionmark.bubble.fill").font(.caption2.weight(.bold)).foregroundStyle(.pink))
         case "auto": AnyView(Label(L.kindAuto.text, systemImage: "cpu").font(.caption2.weight(.bold)).foregroundStyle(.blue))
+        case "light": AnyView(Label(L.kindLight.text, systemImage: "sparkles").font(.caption2.weight(.bold)).foregroundStyle(.teal))
         default: nil
         }
     }

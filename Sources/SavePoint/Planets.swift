@@ -1,15 +1,14 @@
 import SwiftUI
 
-/// The three layers of attention, named after the planets of Outer Wilds from the Sun outwards.
+/// The two layers of attention: the Misión principal and the Misiones secundarias.
 enum Planet: Int, CaseIterable, Identifiable, Codable {
-    case mainQuest = 1, sideQuests, collectibles
+    case mainQuest = 1, sideQuests
     var id: Int { rawValue }
 
     @MainActor var name: String {
         switch self {
         case .mainQuest: L.layerMain.text
         case .sideQuests: L.layerSide.text
-        case .collectibles: L.layerCollectibles.text
         }
     }
 
@@ -17,7 +16,6 @@ enum Planet: Int, CaseIterable, Identifiable, Codable {
         switch self {
         case .mainQuest: "flame.fill"
         case .sideQuests: "circle.bottomhalf.filled"
-        case .collectibles: "water.waves"
         }
     }
 
@@ -25,7 +23,6 @@ enum Planet: Int, CaseIterable, Identifiable, Codable {
         switch self {
         case .mainQuest: .orange
         case .sideQuests: .purple
-        case .collectibles: .teal
         }
     }
 
@@ -33,7 +30,6 @@ enum Planet: Int, CaseIterable, Identifiable, Codable {
         switch self {
         case .mainQuest: L.roleFrog.text
         case .sideQuests: L.roleWhileFrog.text
-        case .collectibles: L.roleLight.text
         }
     }
 
@@ -78,30 +74,35 @@ final class Journey: ObservableObject {
     // MARK: Items
 
     func items(_ planet: Planet, _ day: Day) -> [Item] {
+        if let quests = day.quests {
+            switch planet {
+            case .mainQuest: return frog(day).map { [$0] } ?? []
+            case .sideQuests: return quests.side.filter { $0.md != frog(day)?.md && !$0.isWaiting }
+            }
+        }
         if let layers = day.layers {
             switch planet {
             case .mainQuest: return frog(day).map { [$0] } ?? []
-            case .sideQuests: return layers.sideQuests.filter { $0.md != frog(day)?.md && !$0.isWaiting }
-            case .collectibles: return layers.collectibles
+            case .sideQuests: return (layers.sideQuests + layers.collectibles).filter { $0.md != frog(day)?.md && !$0.isWaiting }
             }
         }
         switch planet {
         case .mainQuest: return day.focus.map { [$0] } ?? []
         case .sideQuests: return (day.queue + day.decisions + day.parallel).filter { !$0.isWaiting }
-        case .collectibles: return day.whileWaiting.map { [Item(text: $0, md: $0, status: "open", size: nil, tags: [], links: [], issue: nil, pr: nil, kind: "light")] } ?? []
         }
     }
 
     /// What left Brittle Hollow because it waits on someone else, in the Daily's order.
     func waiting(_ day: Day) -> [Item] {
-        (day.layers?.sideQuests ?? day.queue + day.decisions + day.parallel).filter(\.isWaiting)
+        (day.quests?.side ?? day.layers?.sideQuests ?? day.queue + day.decisions + day.parallel).filter(\.isWaiting)
     }
 
     func frog(_ day: Day) -> Item? {
-        if let id = frogOverride, let promoted = (day.layers?.sideQuests ?? day.queue).first(where: { $0.md == id }) {
+        if let id = frogOverride, let promoted = (day.quests?.side ?? day.layers?.sideQuests ?? day.queue).first(where: { $0.md == id }) {
             return promoted
         }
-        return day.layers?.mainQuest.first ?? day.focus
+        let main = day.quests?.main ?? day.layers?.mainQuest ?? []
+        return main.first(where: \.isOpen) ?? main.first ?? day.focus
     }
 
     func activeItem(_ planet: Planet, _ day: Day) -> Item? {

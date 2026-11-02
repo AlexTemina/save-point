@@ -19,7 +19,7 @@ enum L: String {
     case agentFor, newAgentFor, typeMessage, jumpHelp, bbHelp, messageHelp, newAgentHelp
     case orcaFailed, noWorktree, language, systemLanguage, english, spanish
     case slackWindows, windowsEnabled, windowLength, minutesUnit, weekdayTimes, timesHelp, openSlackAtStart, quitSlackAtEnd, setSlackStatus, slackToken, slackTokenHelp, statusTexts, windowStarts, windowStartsBody, windowEnds, windowEndsBody, lastWindowBody, extendWindow, skipWindow, startWindowNow, endWindowNow, windowOpenUntil, nextWindow, general, monday, tuesday, wednesday, thursday, friday, saturday, sunday, saved
-    case underway, roleFrog, roleWhileFrog, roleLight, descendTo, ascendTo, descendLocked, descendAnyway, whyDescend, waitingAbove, frogDone, promoteNext, activeNow, nextUp, everything, makeActive, kindDecision, kindAuto, kindLight, showAllPlanets, nothingHere, layerDone, backToFrog
+    case underway, roleFrog, roleWhileFrog, roleLight, descendTo, ascendTo, descendLocked, descendAnyway, whyDescend, waitingAbove, frogDone, promoteNext, activeNow, nextUp, everything, makeActive, kindDecision, kindAuto, kindLight, subIssues, showAllPlanets, nothingHere, layerDone, backToFrog
     case noIssue, week, contractUnconfirmed, setSession, sessionFromClipboard, forgetSession, linkedSession, noSessionInClipboard
     case reload, updatedAt, agents, agentThinking, agentNeedsYou, agentStuck, agentIdle
     case updated, next, matrix, timeline, map, launchAtLogin, openAtLoginHelp
@@ -90,7 +90,8 @@ enum L: String {
         .noSessionInClipboard: ("The clipboard holds no known session id", "El portapapeles no tiene ningún session id conocido"),
         .kindDecision: ("decision", "decisión"),
         .kindAuto: ("agent", "agente"),
-        .kindLight: ("light", "ligera"),
+        .kindLight: ("collectible", "coleccionable"),
+        .subIssues: ("Sub-issues", "Sub-issues"),
         .showAllPlanets: ("Show every layer in the sidebar", "Ver todas las capas en el sidebar"),
         .nothingHere: ("Nothing here today", "Hoy no hay nada aquí"),
         .layerDone: ("All done on this layer", "Todo hecho en esta capa"),
