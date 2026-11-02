@@ -81,6 +81,14 @@ struct PlanetView: View {
             if let contract = day.contract { ContractCard(contract: contract) }
             if let frog = journey.frog(day) {
                 spotlight(L.activeNow.text, frog, strong: true)
+                let rest = (day.layers?.timberHearth ?? []).filter { $0.md != frog.md }
+                if !rest.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(L.nextUp.text.uppercased()).font(.system(size: 10.5, weight: .heavy)).tracking(0.8)
+                            .foregroundStyle(.secondary)
+                        ForEach(rest) { ItemRow(item: $0) }
+                    }
+                }
                 if !frog.isOpen, let next = journey.items(.brittleHollow, day).first(where: \.isOpen) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(L.frogDone.text).font(.headline)
