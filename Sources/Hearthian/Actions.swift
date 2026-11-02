@@ -132,6 +132,12 @@ enum Actions {
         return config.fill(config.startPrompt, item)
     }
 
+    /// The robot's path, in bb.
+    static func openInBB(_ item: Item) {
+        activate(item)
+        perform { try BB.open(item) }
+    }
+
     private static func perform(_ work: @escaping @Sendable () throws -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             do { try work() } catch {

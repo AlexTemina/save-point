@@ -11,6 +11,7 @@ Hearthian does not plan anything itself. Something else writes `~/Library/Applic
 - **Open at login:** a switch in Settings.
 - **On each item:** click opens its first link. Three buttons on hover:
   - Robot: go to its agent in Orca. The live agent of the item's worktree, or a new one there, or a new one in the fallback worktree.
+  - bb: the robot's path in [bb](https://github.com/get-bb/bb). Only Claude threads: the one that names the item's issue, or the one in its worktree, or a new one there, or a new one in the fallback worktree.
   - Robot with a speech bubble: write a message right there, ⌘↩ sends it to that live agent.
   - Robot with a plus: start a fresh agent, with the start prompt ready to edit.
 - **Right click:** the same, plus open any of its links and copy the line.

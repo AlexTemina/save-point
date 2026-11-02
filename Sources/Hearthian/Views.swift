@@ -114,6 +114,9 @@ struct ItemRow: View {
                 if showActions {
                     HStack(spacing: 2) {
                         IconButton(help: L.jumpHelp.text, action: { Actions.jump(item) }) { RobotIcon(size: 15) }
+                        IconButton(help: L.bbHelp.text, action: { Actions.openInBB(item) }) {
+                            Text("bb").font(.system(size: 13, weight: .heavy, design: .rounded))
+                        }
                         IconButton(help: L.messageHelp.text, action: { toggle(.message) }) { RobotIcon(badge: .talk, size: 15) }
                         IconButton(help: L.newAgentHelp.text, action: { toggle(.newAgent) }) { RobotIcon(badge: .plus, size: 15) }
                     }

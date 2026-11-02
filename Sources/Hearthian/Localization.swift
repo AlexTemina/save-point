@@ -15,7 +15,7 @@ enum L: String {
     case appTitle, focus, queue, parallel, whileWaiting, waiting, decisions, notToday
     case openDay, settings, quit, loading, noDay
     case messageAgent, newAgent, send, cancel, openLink, copyLine
-    case agentFor, newAgentFor, typeMessage, jumpHelp, messageHelp, newAgentHelp
+    case agentFor, newAgentFor, typeMessage, jumpHelp, bbHelp, messageHelp, newAgentHelp
     case orcaFailed, noWorktree, language, systemLanguage, english, spanish
     case slackWindows, windowsEnabled, windowLength, minutesUnit, weekdayTimes, timesHelp, openSlackAtStart, quitSlackAtEnd, setSlackStatus, slackToken, slackTokenHelp, statusTexts, windowStarts, windowStartsBody, windowEnds, windowEndsBody, lastWindowBody, extendWindow, skipWindow, startWindowNow, endWindowNow, windowOpenUntil, nextWindow, general, monday, tuesday, wednesday, thursday, friday, saturday, sunday, saved
     case underway, roleFrog, roleWhileFrog, roleLight, descendTo, ascendTo, descendLocked, descendAnyway, whyDescend, waitingAbove, frogDone, promoteNext, activeNow, nextUp, everything, makeActive, kindDecision, kindAuto, kindLight, showAllPlanets, nothingHere, layerDone, backToFrog
@@ -47,6 +47,7 @@ enum L: String {
         .newAgentFor: ("New agent for", "Agente nuevo para"),
         .typeMessage: ("Write the message… ⌘↩ to send", "Escribe el mensaje… ⌘↩ para enviar"),
         .jumpHelp: ("Go to its agent in Orca", "Ir a su agente en Orca"),
+        .bbHelp: ("Go to its agent in bb", "Ir a su agente en bb"),
         .messageHelp: ("Message its live agent", "Mensaje a su agente activo"),
         .newAgentHelp: ("Start a new agent", "Arrancar un agente nuevo"),
         .orcaFailed: ("Orca did not answer", "Orca no ha respondido"),
