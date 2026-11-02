@@ -42,7 +42,7 @@ struct PlanetView: View {
                 Text(planet.role).font(.callout).foregroundStyle(.secondary)
             }
             Spacer()
-            if planet == .brittleHollow || planet == .giantsDeep {
+            if planet == .sideQuests || planet == .collectibles {
                 let list = journey.items(planet, day)
                 Text("\(list.filter { !$0.isOpen }.count)/\(list.count)").font(.title3.monospacedDigit()).foregroundStyle(.secondary)
             }
@@ -56,7 +56,7 @@ struct PlanetView: View {
         let list = journey.items(planet, day)
         if list.isEmpty {
             Text(L.nothingHere.text).foregroundStyle(.secondary).padding(.vertical, 20)
-        } else if planet == .timberHearth {
+        } else if planet == .mainQuest {
             frog(day)
         } else {
             if let active = journey.activeItem(planet, day) {
@@ -69,7 +69,7 @@ struct PlanetView: View {
                 rail(list, active: journey.activeItem(planet, day))
             }
         }
-        if planet == .brittleHollow, !compact, !journey.waiting(day).isEmpty {
+        if planet == .sideQuests, !compact, !journey.waiting(day).isEmpty {
             Card(title: L.waiting.text, icon: "hourglass") {
                 ForEach(journey.waiting(day)) { ItemRow(item: $0) }
             }
@@ -81,7 +81,7 @@ struct PlanetView: View {
             if let contract = day.contract { ContractCard(contract: contract) }
             if let frog = journey.frog(day) {
                 spotlight(L.activeNow.text, frog, strong: true)
-                let rest = (day.layers?.timberHearth ?? []).filter { $0.md != frog.md }
+                let rest = (day.layers?.mainQuest ?? []).filter { $0.md != frog.md }
                 if !rest.isEmpty {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(L.nextUp.text.uppercased()).font(.system(size: 10.5, weight: .heavy)).tracking(0.8)
@@ -89,13 +89,13 @@ struct PlanetView: View {
                         ForEach(rest) { ItemRow(item: $0) }
                     }
                 }
-                if !frog.isOpen, let next = journey.items(.brittleHollow, day).first(where: \.isOpen) {
+                if !frog.isOpen, let next = journey.items(.sideQuests, day).first(where: \.isOpen) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(L.frogDone.text).font(.headline)
                         Button { journey.promote(next) } label: {
                             Label("\(L.promoteNext.text): \(next.heading)", systemImage: "arrow.up.circle.fill")
                         }
-                        .buttonStyle(FilledButtonStyle(tint: Planet.timberHearth.tone))
+                        .buttonStyle(FilledButtonStyle(tint: Planet.mainQuest.tone))
                     }
                     .padding(14)
                     .tonalCard(.green, radius: 12)
@@ -179,7 +179,7 @@ struct PlanetView: View {
     private func waitingAbove(_ day: Day) -> Planet? {
         var p = planet.above
         while let up = p {
-            if let item = up == .timberHearth ? journey.frog(day) : journey.activeItem(up, day),
+            if let item = up == .mainQuest ? journey.frog(day) : journey.activeItem(up, day),
                item.isOpen, monitor.status(for: item)?.state == .needsYou { return up }
             p = up.above
         }
@@ -203,7 +203,7 @@ struct PlanetView: View {
 
     /// Going down needs an agent thinking on this planet's active task; going up is always open.
     private func canDescend(_ day: Day) -> Bool {
-        guard let item = planet == .timberHearth ? journey.frog(day) : journey.activeItem(planet, day) else { return true }
+        guard let item = planet == .mainQuest ? journey.frog(day) : journey.activeItem(planet, day) else { return true }
         return !item.isOpen || monitor.status(for: item)?.state == .thinking
     }
 
@@ -260,7 +260,7 @@ struct ContractCard: View {
             }
             ForEach(contract.tres) { goal in
                 HStack(alignment: .top, spacing: 10) {
-                    StatusDot(color: linear.done(goal) ? .green : Planet.timberHearth.tone, filled: linear.done(goal),
+                    StatusDot(color: linear.done(goal) ? .green : Planet.mainQuest.tone, filled: linear.done(goal),
                               check: linear.done(goal), size: 15)
                         .padding(.top, 2)
                     VStack(alignment: .leading, spacing: 3) {
@@ -290,7 +290,7 @@ struct ContractCard: View {
                     .padding(.horizontal, 8).padding(.vertical, 5)
                     .tonalChip(tint(row))
                     .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .strokeBorder(isToday(row) ? Planet.timberHearth.tone : .clear, lineWidth: 1))
+                        .strokeBorder(isToday(row) ? Planet.mainQuest.tone : .clear, lineWidth: 1))
                     .help([row.una, row.parallels].compactMap { $0 }.joined(separator: "\n"))
                 }
             }

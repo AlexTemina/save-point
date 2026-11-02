@@ -13,7 +13,7 @@ struct MainWindow: View {
     @EnvironmentObject private var settings: AppSettings
     @ObservedObject private var journey = Journey.shared
     @AppStorage("showAllPlanets") private var showAllPlanets = true
-    @State private var page: Page? = .planet(.timberHearth)
+    @State private var page: Page? = .planet(.mainQuest)
 
     var body: some View {
         NavigationSplitView {
@@ -29,7 +29,7 @@ struct MainWindow: View {
         }
         .onChange(of: journey.current) { _, planet in page = .planet(planet) }
         .onChange(of: page) { _, value in if case .planet(let p) = value, p != journey.current { journey.current = p } }
-        .navigationTitle(store.day?.eyebrow ?? "Hearthian")
+        .navigationTitle(store.day?.eyebrow ?? "Save Point")
         .navigationSubtitle(store.updated.map { "\(L.updatedAt.text) \(SlackWindows.hm($0))" } ?? "")
         .toolbar {
             ToolbarItem {
@@ -46,7 +46,7 @@ struct MainWindow: View {
     private var sidebar: some View {
         List(selection: $page) {
             if let day = store.day {
-                Section("Hearthian") {
+                Section("Save Point") {
                     ForEach(Planet.allCases.filter { showAllPlanets || $0 == journey.current }) { planet in
                         planetRow(planet, day)
                     }
@@ -93,7 +93,7 @@ struct MainWindow: View {
     }
 
     private func planetRow(_ planet: Planet, _ day: Day) -> some View {
-        let item = planet == .timberHearth ? journey.frog(day) : journey.activeItem(planet, day)
+        let item = planet == .mainQuest ? journey.frog(day) : journey.activeItem(planet, day)
         let state = item.flatMap { $0.isOpen ? monitor.status(for: $0)?.state : nil }
         let open = journey.items(planet, day).filter(\.isOpen).count
         return HStack(spacing: 8) {
@@ -106,7 +106,7 @@ struct MainWindow: View {
             if let state, state != .none, state != .idle {
                 StatusDot(color: dot(state), size: 9)
             }
-            if planet != .timberHearth { Text("\(open)").font(.caption.monospacedDigit()).foregroundStyle(.secondary) }
+            if planet != .mainQuest { Text("\(open)").font(.caption.monospacedDigit()).foregroundStyle(.secondary) }
         }
         .tag(Page.planet(planet))
     }
@@ -297,7 +297,7 @@ enum LoginItem {
         do {
             if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
         } catch {
-            NSLog("Hearthian login item: \(error.localizedDescription)")
+            NSLog("Save Point login item: \(error.localizedDescription)")
         }
     }
 }

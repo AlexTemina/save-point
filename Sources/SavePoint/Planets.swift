@@ -2,38 +2,38 @@ import SwiftUI
 
 /// The three layers of attention, named after the planets of Outer Wilds from the Sun outwards.
 enum Planet: Int, CaseIterable, Identifiable, Codable {
-    case timberHearth = 1, brittleHollow, giantsDeep
+    case mainQuest = 1, sideQuests, collectibles
     var id: Int { rawValue }
 
-    var name: String {
+    @MainActor var name: String {
         switch self {
-        case .timberHearth: "Timber Hearth"
-        case .brittleHollow: "Brittle Hollow"
-        case .giantsDeep: "Giant's Deep"
+        case .mainQuest: L.layerMain.text
+        case .sideQuests: L.layerSide.text
+        case .collectibles: L.layerCollectibles.text
         }
     }
 
     var icon: String {
         switch self {
-        case .timberHearth: "flame.fill"
-        case .brittleHollow: "circle.bottomhalf.filled"
-        case .giantsDeep: "water.waves"
+        case .mainQuest: "flame.fill"
+        case .sideQuests: "circle.bottomhalf.filled"
+        case .collectibles: "water.waves"
         }
     }
 
     var tone: Color {
         switch self {
-        case .timberHearth: .orange
-        case .brittleHollow: .purple
-        case .giantsDeep: .teal
+        case .mainQuest: .orange
+        case .sideQuests: .purple
+        case .collectibles: .teal
         }
     }
 
     @MainActor var role: String {
         switch self {
-        case .timberHearth: L.roleFrog.text
-        case .brittleHollow: L.roleWhileFrog.text
-        case .giantsDeep: L.roleLight.text
+        case .mainQuest: L.roleFrog.text
+        case .sideQuests: L.roleWhileFrog.text
+        case .collectibles: L.roleLight.text
         }
     }
 
@@ -46,7 +46,7 @@ enum Planet: Int, CaseIterable, Identifiable, Codable {
 final class Journey: ObservableObject {
     static let shared = Journey()
 
-    @Published var current: Planet = .timberHearth { didSet { save() } }
+    @Published var current: Planet = .mainQuest { didSet { save() } }
     @Published private var active: [Int: String] = [:]
     @Published private var frogOverride: String?
     @Published private(set) var forcedDescents: [String] = []
@@ -57,7 +57,7 @@ final class Journey: ObservableObject {
         guard day.date != date else { return }
         date = day.date
         let saved = UserDefaults.standard.dictionary(forKey: "journey-\(day.date)") ?? [:]
-        current = Planet(rawValue: saved["current"] as? Int ?? 1) ?? .timberHearth
+        current = Planet(rawValue: saved["current"] as? Int ?? 1) ?? .mainQuest
         active = (saved["active"] as? [String: String] ?? [:]).reduce(into: [:]) { r, kv in
             if let k = Int(kv.key) { r[k] = kv.value }
         }
@@ -80,28 +80,28 @@ final class Journey: ObservableObject {
     func items(_ planet: Planet, _ day: Day) -> [Item] {
         if let layers = day.layers {
             switch planet {
-            case .timberHearth: return frog(day).map { [$0] } ?? []
-            case .brittleHollow: return layers.brittleHollow.filter { $0.md != frog(day)?.md && !$0.isWaiting }
-            case .giantsDeep: return layers.giantsDeep
+            case .mainQuest: return frog(day).map { [$0] } ?? []
+            case .sideQuests: return layers.sideQuests.filter { $0.md != frog(day)?.md && !$0.isWaiting }
+            case .collectibles: return layers.collectibles
             }
         }
         switch planet {
-        case .timberHearth: return day.focus.map { [$0] } ?? []
-        case .brittleHollow: return (day.queue + day.decisions + day.parallel).filter { !$0.isWaiting }
-        case .giantsDeep: return day.whileWaiting.map { [Item(text: $0, md: $0, status: "open", size: nil, tags: [], links: [], issue: nil, pr: nil, kind: "light")] } ?? []
+        case .mainQuest: return day.focus.map { [$0] } ?? []
+        case .sideQuests: return (day.queue + day.decisions + day.parallel).filter { !$0.isWaiting }
+        case .collectibles: return day.whileWaiting.map { [Item(text: $0, md: $0, status: "open", size: nil, tags: [], links: [], issue: nil, pr: nil, kind: "light")] } ?? []
         }
     }
 
     /// What left Brittle Hollow because it waits on someone else, in the Daily's order.
     func waiting(_ day: Day) -> [Item] {
-        (day.layers?.brittleHollow ?? day.queue + day.decisions + day.parallel).filter(\.isWaiting)
+        (day.layers?.sideQuests ?? day.queue + day.decisions + day.parallel).filter(\.isWaiting)
     }
 
     func frog(_ day: Day) -> Item? {
-        if let id = frogOverride, let promoted = (day.layers?.brittleHollow ?? day.queue).first(where: { $0.md == id }) {
+        if let id = frogOverride, let promoted = (day.layers?.sideQuests ?? day.queue).first(where: { $0.md == id }) {
             return promoted
         }
-        return day.layers?.timberHearth.first ?? day.focus
+        return day.layers?.mainQuest.first ?? day.focus
     }
 
     func activeItem(_ planet: Planet, _ day: Day) -> Item? {
@@ -123,7 +123,7 @@ final class Journey: ObservableObject {
     // MARK: Moves
 
     func activate(_ item: Item, in day: Day?) {
-        guard let day, let planet = planet(of: item, day), planet != .timberHearth else { return }
+        guard let day, let planet = planet(of: item, day), planet != .mainQuest else { return }
         active[planet.rawValue] = item.md
         started.insert(item.md)
         save()
@@ -134,8 +134,8 @@ final class Journey: ObservableObject {
     /// The frog is done: the chosen Brittle Hollow item becomes the frog.
     func promote(_ item: Item) {
         frogOverride = item.md
-        active[Planet.brittleHollow.rawValue] = nil
-        current = .timberHearth
+        active[Planet.sideQuests.rawValue] = nil
+        current = .mainQuest
         save()
     }
 

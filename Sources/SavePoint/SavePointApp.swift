@@ -1,13 +1,13 @@
 import SwiftUI
 
 @main
-struct HearthianApp: App {
+struct SavePointApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
     @StateObject private var store = Store()
     @StateObject private var settings = AppSettings.shared
 
     var body: some Scene {
-        Window("Hearthian", id: "main") {
+        Window("Save Point", id: "main") {
             MainWindow(store: store)
                 .environmentObject(settings)
                 .frame(minWidth: 760, minHeight: 620)
@@ -30,7 +30,7 @@ struct HearthianApp: App {
     }
 }
 
-/// Closing the window keeps Hearthian alive in the menu bar; the Dock icon brings the window back.
+/// Closing the window keeps Save Point alive in the menu bar; the Dock icon brings the window back.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 

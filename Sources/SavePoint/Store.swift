@@ -1,11 +1,11 @@
 import Foundation
 import SwiftUI
 
-/// Reads ~/Library/Application Support/Hearthian/today.json and keeps it current: the vault's renderer
+/// Reads ~/Library/Application Support/Save Point/today.json and keeps it current: the vault's renderer
 /// rewrites that file on every Daily refresh, and the app picks it up within two seconds.
 enum Paths {
     static let folder = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Library/Application Support/Hearthian")
+        .appendingPathComponent("Library/Application Support/Save Point")
     static let dayFile = folder.appendingPathComponent("today.json")
 }
 
@@ -82,7 +82,7 @@ final class Store: ObservableObject {
         root = walk(root)
         if var dict = root as? [String: Any], let queue = (dict["queue"] as? [[String: Any]])?.filter({ $0["status"] as? String != "waiting" }) {
             var progress: [String: Any] = ["done": queue.filter { $0["status"] as? String != "open" }.count, "total": queue.count]
-            let frog = ((dict["layers"] as? [String: Any])?["timber_hearth"] as? [[String: Any]])?.first ?? dict["focus"] as? [String: Any]
+            let frog = ((dict["layers"] as? [String: Any])?["main_quest"] as? [[String: Any]])?.first ?? dict["focus"] as? [String: Any]
             if let status = frog?["status"] as? String { progress["frog_done"] = status != "open" && status != "waiting" }
             dict["progress"] = progress
             root = dict

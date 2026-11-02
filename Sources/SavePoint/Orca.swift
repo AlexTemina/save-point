@@ -154,14 +154,14 @@ enum Orca {
         try run(["terminal", "send", "--terminal", terminal.handle, "--text", text, "--enter", "--json"])
     }
 
-    /// A new Claude in the worktree. HEARTHIAN_ITEM rides along so the hook reports which item the session is for.
+    /// A new Claude in the worktree. SAVEPOINT_ITEM rides along so the hook reports which item the session is for.
     static func newAgent(prompt: String, in worktree: Worktree, item: String? = nil, title: String? = nil) throws {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("hearthian-\(UUID().uuidString)")
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("savepoint-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let file = dir.appendingPathComponent("prompt.txt")
         try prompt.write(to: file, atomically: true, encoding: .utf8)
         let mode = Config.load().permissionMode
-        let env = item.map { "HEARTHIAN_ITEM='\($0)' " } ?? ""
+        let env = item.map { "SAVEPOINT_ITEM='\($0)' " } ?? ""
         let handle = try launch("\(env)claude --permission-mode \(mode) \"$(cat '\(file.path)')\"; rm -rf '\(dir.path)'", in: worktree)
         if let handle, let title { rename(handle, to: title) }
     }
@@ -169,7 +169,7 @@ enum Orca {
     /// Brings back a closed Claude conversation in its worktree.
     static func resume(session: String, in worktree: Worktree, item: String) throws {
         let mode = Config.load().permissionMode
-        try launch("HEARTHIAN_ITEM='\(item)' claude --permission-mode \(mode) --resume \(session)", in: worktree)
+        try launch("SAVEPOINT_ITEM='\(item)' claude --permission-mode \(mode) --resume \(session)", in: worktree)
     }
 
     @discardableResult
@@ -202,7 +202,7 @@ enum Orca {
     }
 }
 
-/// ~/Library/Application Support/Hearthian/config.json. Nothing personal lives in the code.
+/// ~/Library/Application Support/Save Point/config.json. Nothing personal lives in the code.
 struct Config: Codable {
     var fallbackWorktree: String?
     var startPrompt: String = "Start working on {target}: {text}"

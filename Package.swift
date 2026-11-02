@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "Hearthian",
+    name: "SavePoint",
     platforms: [.macOS(.v14)],
     targets: [
-        .executableTarget(name: "Hearthian", path: "Sources/Hearthian")
+        .executableTarget(name: "SavePoint", path: "Sources/SavePoint")
     ]
 )

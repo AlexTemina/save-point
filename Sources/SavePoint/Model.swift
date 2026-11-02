@@ -151,9 +151,9 @@ struct Day: Codable {
 
 
 struct Layers: Codable {
-    let timberHearth: [Item]
-    let brittleHollow: [Item]
-    let giantsDeep: [Item]
+    let mainQuest: [Item]
+    let sideQuests: [Item]
+    let collectibles: [Item]
 }
 
 

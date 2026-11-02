@@ -432,7 +432,7 @@ enum Links {
         if let data = try? JSONEncoder().encode(links) { UserDefaults.standard.set(data, forKey: Self.key) }
     }
 
-    /// A session Hearthian launched carries its item in HEARTHIAN_ITEM: the hook reports it and it is linked here.
+    /// A session Save Point launched carries its item in SAVEPOINT_ITEM: the hook reports it and it is linked here.
     static func adopt(_ sessions: [Session]) {
         for s in sessions {
             guard let item = s.item, !item.isEmpty, let worktree = s.worktreeId, !worktree.isEmpty,

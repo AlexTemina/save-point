@@ -63,7 +63,7 @@ enum BB {
 
     /// A new thread on the folder as it is, in the bb project of its repository.
     static func spawn(_ prompt: String, in path: String, title: String?) throws -> String {
-        let file = FileManager.default.temporaryDirectory.appendingPathComponent("hearthian-bb-\(UUID().uuidString).txt")
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("savepoint-bb-\(UUID().uuidString).txt")
         try prompt.write(to: file, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: file) }
         // Claude, as the robot: without it bb takes the project's remembered provider, which can be Codex.

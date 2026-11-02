@@ -47,7 +47,7 @@ enum Actions {
     /// 2. Else the item's linked Claude session: its terminal, or the conversation resumed if it closed.
     /// 3. Else the live agent in the item's worktree (by issue or PR), which becomes the linked one.
     /// 4. Else a new agent: in that worktree, or /start-task from the fallback one when there is an issue.
-    /// Agents launched here carry HEARTHIAN_ITEM, so the hook links them on the next poll.
+    /// Agents launched here carry SAVEPOINT_ITEM, so the hook links them on the next poll.
     static func jump(_ item: Item) {
         activate(item)
         perform {
@@ -80,7 +80,7 @@ enum Actions {
             }
 
             guard let (worktree, _) = try Orca.agent(for: item) else {
-                // HEARTHIAN_ITEM links the agent started here, so the next click comes back to it when /start-task
+                // SAVEPOINT_ITEM links the agent started here, so the next click comes back to it when /start-task
                 // keeps the work in this session. When it opens a worktree, that agent's named tab wins above.
                 guard item.target != nil else { return try Orca.newAgent(prompt: item.text, in: try Orca.fallback(), item: key) }
                 return try Orca.newAgent(prompt: config.fill(config.startPrompt, item), in: try Orca.fallback(), item: key)

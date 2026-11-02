@@ -12,6 +12,7 @@ enum Language: String, CaseIterable, Identifiable {
 
 /// Every string the app shows. The day's own content comes from today.json as written.
 enum L: String {
+    case layerMain, layerSide, layerCollectibles
     case appTitle, focus, queue, parallel, whileWaiting, waiting, decisions, notToday
     case openDay, settings, quit, loading, noDay
     case messageAgent, newAgent, send, cancel, openLink, copyLine
@@ -24,11 +25,14 @@ enum L: String {
     case updated, next, matrix, timeline, map, launchAtLogin, openAtLoginHelp
 
     private static let table: [L: (en: String, es: String)] = [
-        .appTitle: ("Today", "Parte del día"),
-        .focus: ("TIMBER HEARTH · MAIN QUEST", "TIMBER HEARTH · MISIÓN PRINCIPAL"),
-        .queue: ("Brittle Hollow · Side quests", "Brittle Hollow · Misiones secundarias"),
+        .appTitle: ("Save Point", "Save Point"),
+        .layerMain: ("Main quest", "Misión principal"),
+        .layerSide: ("Side quests", "Misiones secundarias"),
+        .layerCollectibles: ("Collectibles", "Coleccionables"),
+        .focus: ("MAIN QUEST", "MISIÓN PRINCIPAL"),
+        .queue: ("Side quests", "Misiones secundarias"),
         .parallel: ("The Brotherhood", "La Hermandad"),
-        .whileWaiting: ("Giant's Deep · Collectibles", "Giant's Deep · Coleccionables"),
+        .whileWaiting: ("Collectibles", "Coleccionables"),
         .waiting: ("⏳ Waiting on someone", "⏳ Esperando a alguien"),
         .decisions: ("Decisions", "Decisiones"),
         .notToday: ("Not today", "Hoy no"),
@@ -87,9 +91,9 @@ enum L: String {
         .kindDecision: ("decision", "decisión"),
         .kindAuto: ("recruit", "recluta"),
         .kindLight: ("light", "ligera"),
-        .showAllPlanets: ("Show every planet in the sidebar", "Ver todos los planetas en el sidebar"),
+        .showAllPlanets: ("Show every layer in the sidebar", "Ver todas las capas en el sidebar"),
         .nothingHere: ("Nothing here today", "Hoy no hay nada aquí"),
-        .layerDone: ("All done on this planet", "Todo hecho en este planeta"),
+        .layerDone: ("All done on this layer", "Todo hecho en esta capa"),
         .backToFrog: ("Back to the main quest", "Volver a la misión principal"),
         .agents: ("The Brotherhood", "La Hermandad"),
         .agentThinking: ("thinking", "pensando"),
